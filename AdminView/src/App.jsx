@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './index.css';
 import Dashboard from './pages/Dashboard.jsx';
 import Campaigns from './pages/Campaigns.jsx';
@@ -12,11 +12,22 @@ const NAV_ITEMS = [
 
 export default function App() {
   const [page, setPage] = useState('dashboard');
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+  const [defaultTargetUrl, setDefaultTargetUrl] = useState(() => localStorage.getItem('defaultTargetUrl') || 'https://www.mikolajstanco.pl');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    localStorage.setItem('defaultTargetUrl', defaultTargetUrl);
+  }, [defaultTargetUrl]);
 
   const renderPage = () => {
     switch (page) {
       case 'dashboard': return <Dashboard />;
-      case 'campaigns': return <Campaigns />;
+      case 'campaigns': return <Campaigns defaultTargetUrl={defaultTargetUrl} />;
       case 'analytics': return <Analytics />;
       default: return <Dashboard />;
     }
@@ -43,10 +54,35 @@ export default function App() {
           ))}
         </nav>
 
+        {/* Settings */}
+        <div style={{ padding: '16px', borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12, textTransform: 'uppercase' }}>Ustawienia</div>
+          
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Domyślny link docelowy</label>
+            <input 
+              type="text" 
+              className="form-input" 
+              style={{ fontSize: 12, padding: '6px 10px' }}
+              value={defaultTargetUrl}
+              onChange={e => setDefaultTargetUrl(e.target.value)}
+              placeholder="https://..."
+            />
+          </div>
+
+          <button 
+            className="btn btn-ghost" 
+            style={{ width: '100%', justifyContent: 'center', fontSize: 13 }}
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          >
+            {theme === 'dark' ? '☀️ Tryb jasny' : '🌙 Tryb ciemny'}
+          </button>
+        </div>
+
         {/* Footer info */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ fontSize: 11, color: '#64748b', lineHeight: 1.6 }}>
-            <div style={{ fontWeight: 600, color: '#94a3b8', marginBottom: 4 }}>API Tracker</div>
+        <div style={{ padding: '16px 24px', borderTop: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            <div style={{ fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>API Tracker</div>
             <div>localhost:5000</div>
           </div>
         </div>
